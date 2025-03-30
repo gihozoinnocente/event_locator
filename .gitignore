@@ -1,4 +1,5 @@
 # Node.js
+yarn.lock
 node_modules/
 npm-debug.log
 yarn-error.log

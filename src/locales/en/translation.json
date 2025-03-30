@@ -1,0 +1,45 @@
+{
+    "welcome": "Welcome to the Event Locator API",
+    "server_error": "Internal Server Error",
+    "auth": {
+      "register_success": "User registered successfully",
+      "login_success": "Login successful",
+      "invalid_credentials": "Invalid credentials",
+      "user_exists": "User already exists",
+      "email_exists": "Email already in use",
+      "token_required": "Authentication token required",
+      "invalid_token": "Invalid token"
+    },
+    "users": {
+      "not_found": "User not found",
+      "updated": "User profile updated successfully",
+      "preferences_updated": "User preferences updated successfully",
+      "location_updated": "User location updated successfully"
+    },
+    "events": {
+      "created": "Event created successfully",
+      "updated": "Event updated successfully",
+      "deleted": "Event deleted successfully",
+      "not_found": "Event not found",
+      "unauthorized": "You are not authorized to perform this action",
+      "rating_created": "Rating submitted successfully",
+      "already_rated": "You have already rated this event",
+      "favorite_added": "Event added to favorites",
+      "favorite_removed": "Event removed from favorites"
+    },
+    "categories": {
+      "created": "Category created successfully",
+      "updated": "Category updated successfully",
+      "deleted": "Category deleted successfully",
+      "not_found": "Category not found",
+      "exists": "Category already exists"
+    },
+    "validation": {
+      "required_field": "{{field}} is required",
+      "invalid_email": "Invalid email format",
+      "password_length": "Password must be at least 6 characters",
+      "invalid_date": "Invalid date format",
+      "invalid_coordinates": "Invalid coordinates",
+      "invalid_rating": "Rating must be between 1 and 5"
+    }
+  }

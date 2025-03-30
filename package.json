@@ -1,0 +1,43 @@
+{
+    "name": "event-locator-app",
+    "version": "1.0.0",
+    "description": "A multi-user event locator application with geospatial capabilities",
+    "main": "src/server.js",
+    "scripts": {
+      "start": "node src/server.js",
+      "dev": "nodemon src/server.js",
+      "test": "jest --coverage",
+      "lint": "eslint ."
+    },
+    "keywords": [
+      "geospatial",
+      "events",
+      "node.js",
+      "express",
+      "postgres",
+      "postgis"
+    ],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+      "bcrypt": "^5.1.1",
+      "body-parser": "^1.20.2",
+      "cors": "^2.8.5",
+      "dotenv": "^16.3.1",
+      "express": "^4.18.2",
+      "express-validator": "^7.0.1",
+      "helmet": "^7.1.0",
+      "i18next": "^23.7.11",
+      "i18next-http-middleware": "^3.5.0",
+      "i18next-fs-backend": "^2.3.1",
+      "jsonwebtoken": "^9.0.2",
+      "pg": "^8.11.3",
+      "redis": "^4.6.11"
+    },
+    "devDependencies": {
+      "eslint": "^8.56.0",
+      "jest": "^29.7.0",
+      "nodemon": "^3.0.2",
+      "supertest": "^6.3.3"
+    }
+  }

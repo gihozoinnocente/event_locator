@@ -170,14 +170,6 @@ The application uses the following database tables:
 6. **event_ratings**: User ratings and reviews for events
 7. **user_favorite_events**: Junction table for user favorite events
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b my-new-feature`
-3. Commit your changes: `git commit -am 'Add some feature'`
-4. Push to the branch: `git push origin my-new-feature`
-5. Submit a pull request
-
 ## License
 
 This project is licensed under the ISC License.

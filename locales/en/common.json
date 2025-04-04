@@ -1,44 +1,44 @@
 {
-    "welcome": "Welcome to Event Locator!",
-    "events": {
-      "title": "Events",
-      "nearby": "Nearby Events",
-      "search": "Search Events",
-      "create": "Create Event",
-      "details": "Event Details",
-      "noEvents": "No events found"
-    },
-    "categories": {
-      "title": "Categories",
-      "select": "Select Categories"
-    },
-    "notifications": {
-      "title": "Notifications",
-      "newEvent": "New Event Alert"
-    },
-    "common": {
-      "loading": "Loading...",
-      "error": "An error occurred",
-      "success": "Success!",
-      "save": "Save",
-      "cancel": "Cancel",
-      "delete": "Delete",
-      "edit": "Edit",
-      "view": "View",
-      "search": "Search",
-      "filter": "Filter"
-    },
-    "location": {
-      "distance": "Distance",
-      "km": "km",
-      "miles": "miles",
-      "address": "Address",
-      "setLocation": "Set Location"
-    },
-    "user": {
-      "profile": "Profile",
-      "settings": "Settings",
-      "favorites": "Favorites",
-      "logout": "Logout"
-    }
+  "welcome": "Welcome to Event Locator!",
+  "events": {
+    "title": "Events",
+    "nearby": "Nearby Events",
+    "search": "Search Events",
+    "create": "Create Event",
+    "details": "Event Details",
+    "noEvents": "No events found"
+  },
+  "categories": {
+    "title": "Categories",
+    "select": "Select Categories"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "newEvent": "New Event Alert"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success!",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "search": "Search",
+    "filter": "Filter"
+  },
+  "location": {
+    "distance": "Distance",
+    "km": "km",
+    "miles": "miles",
+    "address": "Address",
+    "setLocation": "Set Location"
+  },
+  "user": {
+    "profile": "Profile",
+    "settings": "Settings",
+    "favorites": "Favorites",
+    "logout": "Logout"
   }
+}

@@ -17,10 +17,11 @@ const setupI18n = () => {
       ns: ['common', 'auth', 'events', 'notifications'],
       defaultNS: 'common',
       detection: {
-        order: ['querystring', 'cookie', 'header'],
+        // Prioritize query parameter over header for easier testing
+        order: ['querystring', 'header', 'cookie'],
         lookupQuerystring: 'lng',
-        lookupCookie: 'i18next',
         lookupHeader: 'accept-language',
+        lookupCookie: 'i18next',
         caches: ['cookie'],
       },
     });

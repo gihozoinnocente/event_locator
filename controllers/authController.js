@@ -141,8 +141,48 @@ const getCurrentUser = async (req, res, next) => {
   }
 };
 
+// Test internationalization
+const testI18n = (req, res) => {
+  // Get the current language from i18next
+  const currentLang = req.language || req.i18n.language || 'en';
+  
+  // Log for debugging
+  console.log('Current language:', currentLang);
+  console.log('Available languages:', req.i18n.languages);
+  console.log('Headers:', req.headers);
+  
+  // Get translations for common keys
+  const translations = {
+    welcome: req.t('welcome'),
+    events: {
+      title: req.t('events.title'),
+      nearby: req.t('events.nearby'),
+      search: req.t('events.search')
+    },
+    common: {
+      loading: req.t('common.loading'),
+      error: req.t('common.error'),
+      success: req.t('common.success')
+    },
+    auth: {
+      loginSuccess: req.t('auth:loginSuccess'),
+      registerSuccess: req.t('auth:registerSuccess')
+    }
+  };
+  
+  res.status(200).json({
+    success: true,
+    message: req.t('welcome'),
+    detectedLanguage: currentLang,
+    requestedVia: req.query.lng ? 'query parameter' : (req.headers['accept-language'] ? 'header' : 'default'),
+    supportedLanguages: ['en', 'es', 'fr'],
+    translations: translations
+  });
+};
+
 module.exports = {
   register,
   login,
-  getCurrentUser
+  getCurrentUser,
+  testI18n
 };

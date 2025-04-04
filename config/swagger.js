@@ -7,7 +7,7 @@ const swaggerOptions = {
     info: {
       title: 'Event Locator API',
       version: '1.0.0',
-      description: 'A RESTful API for location-based event discovery',
+      description: 'A RESTful API for location-based event discovery with multilingual support. This API supports internationalization through the `Accept-Language` header or `lng` query parameter. Supported languages include English (en), Spanish (es), and French (fr).',
       license: {
         name: 'ISC License',
         url: 'https://opensource.org/licenses/ISC'
@@ -32,6 +32,28 @@ const swaggerOptions = {
           bearerFormat: 'JWT'
         }
       },
+      parameters: {
+        AcceptLanguage: {
+          name: 'Accept-Language',
+          in: 'header',
+          description: 'Language preference for response messages. Supported values: en (English), es (Spanish), fr (French).',
+          schema: {
+            type: 'string',
+            default: 'en',
+            enum: ['en', 'es', 'fr']
+          }
+        },
+        LanguageQuery: {
+          name: 'lng',
+          in: 'query',
+          description: 'Language preference for response messages. Supported values: en (English), es (Spanish), fr (French).',
+          schema: {
+            type: 'string',
+            default: 'en',
+            enum: ['en', 'es', 'fr']
+          }
+        }
+      },
       schemas: {
         User: {
           type: 'object',
@@ -47,7 +69,11 @@ const swaggerOptions = {
                 longitude: { type: 'number' }
               }
             },
-            preferredLanguage: { type: 'string' }
+            preferredLanguage: { 
+              type: 'string',
+              description: 'User\'s preferred language for notifications and emails',
+              enum: ['en', 'es', 'fr'] 
+            }
           }
         },
         Event: {

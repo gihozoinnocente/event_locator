@@ -165,56 +165,38 @@ class Event {
         paramIndex++;
       }
       
-      queryParts.push(`updated_at = CURRENT_TIMESTAMP`);
+      if (queryParts.length === 0) {
+        // No updates to make
+        return await Event.findById(id);
+      }
       
       query += queryParts.join(', ');
-      query += ` WHERE id = $${paramIndex} RETURNING id, title, description, ST_AsGeoJSON(location) as location, address, start_time, end_time, creator_id, updated_at`;
+      query += ` WHERE id = $${paramIndex} RETURNING id`;
       values.push(id);
       
-      const eventResult = await db.query(query, values);
+      // Update event
+      const result = await db.query(query, values);
       
-      if (eventResult.rows.length === 0) {
-        // Rollback and return null if event not found
+      if (result.rows.length === 0) {
         await db.query('ROLLBACK');
         return null;
       }
       
-      const event = eventResult.rows[0];
-      
-      // Parse the location
-      const locationData = JSON.parse(event.location);
-      event.location = {
-        latitude: locationData.coordinates[1],
-        longitude: locationData.coordinates[0]
-      };
-      
       // Update categories if provided
-      if (categoryIds) {
-        // First, delete existing categories
+      if (categoryIds && categoryIds.length > 0) {
+        // Remove existing categories
         await db.query('DELETE FROM event_categories WHERE event_id = $1', [id]);
         
-        // Then, insert new categories if there are any
-        if (categoryIds.length > 0) {
-          const categoryValues = categoryIds.map(categoryId => `(${id}, ${categoryId})`).join(', ');
-          await db.query(`INSERT INTO event_categories (event_id, category_id) VALUES ${categoryValues}`);
-        }
-        
-        // Get the updated categories
-        const categoriesResult = await db.query(
-          `SELECT c.id, c.name, c.description
-          FROM categories c
-          JOIN event_categories ec ON c.id = ec.category_id
-          WHERE ec.event_id = $1`,
-          [id]
-        );
-        
-        event.categories = categoriesResult.rows;
+        // Add new categories
+        const categoryValues = categoryIds.map(categoryId => `(${id}, ${categoryId})`).join(', ');
+        await db.query(`INSERT INTO event_categories (event_id, category_id) VALUES ${categoryValues}`);
       }
       
       // Commit the transaction
       await db.query('COMMIT');
       
-      return event;
+      // Return the updated event
+      return await Event.findById(id);
     } catch (error) {
       // Rollback the transaction in case of error
       await db.query('ROLLBACK');
@@ -225,8 +207,8 @@ class Event {
   // Delete an event
   static async delete(id) {
     try {
-      const result = await db.query('DELETE FROM events WHERE id = $1 RETURNING id', [id]);
-      return result.rowCount > 0;
+      await db.query('DELETE FROM events WHERE id = $1', [id]);
+      return true;
     } catch (error) {
       throw error;
     }
@@ -244,7 +226,7 @@ class Event {
         e.created_at, e.updated_at
         FROM events e
         JOIN users u ON e.creator_id = u.id
-        ORDER BY e.start_time
+        ORDER BY e.created_at DESC
         LIMIT $1 OFFSET $2`,
         [limit, offset]
       );
@@ -307,13 +289,38 @@ class Event {
   static async search(params) {
     const { latitude, longitude, radius = 10, categoryIds, startDate, endDate, page = 1, limit = 10 } = params;
     
+    // Debug parameters
+    console.log('Search parameters:', { 
+      latitude, 
+      longitude, 
+      radius, 
+      categoryIds, 
+      startDate, 
+      endDate, 
+      page, 
+      limit 
+    });
+    
+    // Validate coordinates are present
+    if (!latitude || !longitude) {
+      console.error('Missing coordinates for search. Latitude:', latitude, 'Longitude:', longitude);
+      return { events: [], pagination: { total: 0, page, limit, pages: 0 } };
+    }
+    
+    // Convert to numbers to ensure proper type
+    const lat = parseFloat(latitude);
+    const lng = parseFloat(longitude);
+    const rad = parseFloat(radius);
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    
     try {
-      const offset = (page - 1) * limit;
+      const offset = (pageNum - 1) * limitNum;
       let query = `
         SELECT e.id, e.title, e.description, ST_AsGeoJSON(e.location) as location, 
         e.address, e.start_time, e.end_time, e.creator_id, u.username as creator_name,
         e.created_at, e.updated_at,
-        ST_Distance(e.location, ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography) / 1000 as distance
+        ST_Distance(e.location, ST_SetSRID(ST_MakePoint($2, $1), 4326)::geography) / 1000 as distance
         FROM events e
         JOIN users u ON e.creator_id = u.id
       `;
@@ -322,6 +329,8 @@ class Event {
         SELECT COUNT(*) 
         FROM events e
       `;
+      
+      let paramCounter = 3; // Starting with 3 because we've used $1, $2 for lat/lng and $3 for radius
       
       // Add category filter if provided
       if (categoryIds && categoryIds.length > 0) {
@@ -335,45 +344,58 @@ class Event {
           WHERE ec.category_id IN (${categoryIds.join(',')})
         `;
         
-        // Add location filter
-        query += ` AND ST_DWithin(e.location, ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography, $3 * 1000)`;
-        countQuery += ` AND ST_DWithin(e.location, ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography, $3 * 1000)`;
+        // Add location filter - IMPORTANT: Note we're using lat as $1 and lng as $2
+        query += ` AND ST_DWithin(e.location, ST_SetSRID(ST_MakePoint($2, $1), 4326)::geography, $3 * 1000)`;
+        countQuery += ` AND ST_DWithin(e.location, ST_SetSRID(ST_MakePoint($2, $1), 4326)::geography, $3 * 1000)`;
       } else {
         // Add location filter without categories
-        query += ` WHERE ST_DWithin(e.location, ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography, $3 * 1000)`;
-        countQuery += ` WHERE ST_DWithin(e.location, ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography, $3 * 1000)`;
+        query += ` WHERE ST_DWithin(e.location, ST_SetSRID(ST_MakePoint($2, $1), 4326)::geography, $3 * 1000)`;
+        countQuery += ` WHERE ST_DWithin(e.location, ST_SetSRID(ST_MakePoint($2, $1), 4326)::geography, $3 * 1000)`;
       }
       
       // Add date filter if provided
       if (startDate) {
-        query += ` AND e.start_time >= $4`;
-        countQuery += ` AND e.start_time >= $4`;
+        paramCounter++;
+        query += ` AND e.start_time >= $${paramCounter}`;
+        countQuery += ` AND e.start_time >= $${paramCounter}`;
       }
       
       if (endDate) {
-        query += ` AND e.end_time <= ${startDate ? '5' : '4'}`;
-        countQuery += ` AND e.end_time <= ${startDate ? '5' : '4'}`;
+        paramCounter++;
+        query += ` AND e.end_time <= $${paramCounter}`;
+        countQuery += ` AND e.end_time <= $${paramCounter}`;
       }
       
-      // Order by distance and add pagination
-      query += ` ORDER BY distance LIMIT ${startDate && endDate ? '6' : startDate || endDate ? '5' : '4'} OFFSET ${startDate && endDate ? '7' : startDate || endDate ? '6' : '5'}`;
+      // Add LIMIT and OFFSET with correct parameter numbering
+      paramCounter++;
+      const limitParam = paramCounter;
+      paramCounter++;
+      const offsetParam = paramCounter;
       
-      // Prepare query parameters
-      const queryParams = [longitude, latitude, radius];
+      // Order by distance and add pagination with correct parameter numbering
+      query += ` ORDER BY distance LIMIT $${limitParam} OFFSET $${offsetParam}`;
+      
+      // Prepare query parameters - IMPORTANT: Latitude first, then longitude
+      const queryParams = [lat, lng, rad];
       if (startDate) queryParams.push(startDate);
       if (endDate) queryParams.push(endDate);
-      queryParams.push(limit, offset);
+      queryParams.push(limitNum, offset);
       
       // Prepare count parameters
-      const countParams = [longitude, latitude, radius];
+      const countParams = [lat, lng, rad];
       if (startDate) countParams.push(startDate);
       if (endDate) countParams.push(endDate);
+      
+      // Debug SQL
+      console.log('Event search SQL:', { query, params: queryParams });
+      console.log('Count SQL:', { countQuery, params: countParams });
       
       // Execute the queries
       const eventsResult = await db.query(query, queryParams);
       const countResult = await db.query(countQuery, countParams);
       
       const totalCount = parseInt(countResult.rows[0].count);
+      console.log(`Found ${totalCount} events matching search criteria`);
       
       // Process each event
       const events = await Promise.all(eventsResult.rows.map(async (event) => {
@@ -415,12 +437,13 @@ class Event {
         events,
         pagination: {
           total: totalCount,
-          page,
-          limit,
-          pages: Math.ceil(totalCount / limit)
+          page: pageNum,
+          limit: limitNum,
+          pages: Math.ceil(totalCount / limitNum)
         }
       };
     } catch (error) {
+      console.error('Error in search method:', error);
       throw error;
     }
   }

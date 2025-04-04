@@ -7,10 +7,75 @@ const router = express.Router();
 
 /**
  * @swagger
+ * tags:
+ *   - name: Authentication
+ *     description: User authentication operations
+ *   - name: Internationalization
+ *     description: Information about multilingual support
+ */
+
+/**
+ * @swagger
+ * /auth/i18n-test:
+ *   get:
+ *     summary: Test internationalization (i18n) functionality
+ *     description: This endpoint demonstrates the API's internationalization capabilities. Response messages will be in the requested language.
+ *     tags: [Internationalization]
+ *     parameters:
+ *       - $ref: '#/components/parameters/AcceptLanguage'
+ *       - $ref: '#/components/parameters/LanguageQuery'
+ *     responses:
+ *       200:
+ *         description: Language test successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Welcome to Event Locator!"
+ *                 detectedLanguage:
+ *                   type: string
+ *                   example: "en"
+ *                 supportedLanguages:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["en", "es", "fr"]
+ *                 translations:
+ *                   type: object
+ *                   properties:
+ *                     welcome:
+ *                       type: string
+ *                     events:
+ *                       type: object
+ *                     common: 
+ *                       type: object
+ */
+router.get('/i18n-test', (req, res) => {
+  // Get the current language from i18next
+  const currentLang = req.language || 'en';
+  
+  res.status(200).json({
+    success: true,
+    message: req.t('welcome'),
+    detectedLanguage: currentLang,
+    supportedLanguages: ['en', 'es', 'fr']
+  });
+});
+
+/**
+ * @swagger
  * /auth/register:
  *   post:
  *     summary: Register a new user
  *     tags: [Authentication]
+ *     parameters:
+ *       - $ref: '#/components/parameters/AcceptLanguage'
  *     requestBody:
  *       required: true
  *       content:

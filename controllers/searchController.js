@@ -5,6 +5,8 @@ const User = require('../models/User');
 // Search for events based on location and filters
 const searchEvents = async (req, res, next) => {
   try {
+    console.log('Received search request with query:', req.query);
+    
     // Validate request
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -27,6 +29,19 @@ const searchEvents = async (req, res, next) => {
       const user = await User.findById(req.user.id);
       searchLatitude = user.location.latitude;
       searchLongitude = user.location.longitude;
+      console.log('Using user location:', { searchLatitude, searchLongitude });
+    }
+    
+    // Check if we have coordinates to search with
+    if (!searchLatitude || !searchLongitude) {
+      return res.status(400).json({
+        success: false,
+        message: 'Location coordinates are required for search. Please provide latitude and longitude.',
+        data: {
+          events: [],
+          pagination: { total: 0, page, limit, pages: 0 }
+        }
+      });
     }
     
     // Default radius
@@ -40,24 +55,31 @@ const searchEvents = async (req, res, next) => {
         : categoryIds.split(',').map(id => parseInt(id.trim()));
     }
     
-    // Search events
-    const events = await Event.search({
-      latitude: searchLatitude,
-      longitude: searchLongitude,
-      radius: searchRadius,
+    // Convert parameters to proper types
+    const searchParams = {
+      latitude: parseFloat(searchLatitude),
+      longitude: parseFloat(searchLongitude),
+      radius: parseFloat(searchRadius),
       categoryIds: parsedCategoryIds,
       startDate: startDate ? new Date(startDate) : null,
       endDate: endDate ? new Date(endDate) : null,
       page,
       limit
-    });
+    };
+    
+    console.log('Searching events with parameters:', searchParams);
+    
+    // Search events
+    const events = await Event.search(searchParams);
+    
+    console.log(`Found ${events.events.length} events out of ${events.pagination.total} total`);
     
     res.status(200).json({
       success: true,
       query: {
-        latitude: searchLatitude,
-        longitude: searchLongitude,
-        radius: searchRadius,
+        latitude: searchParams.latitude,
+        longitude: searchParams.longitude,
+        radius: searchParams.radius,
         categoryIds: parsedCategoryIds,
         startDate,
         endDate
@@ -65,6 +87,7 @@ const searchEvents = async (req, res, next) => {
       data: events
     });
   } catch (error) {
+    console.error('Error in searchEvents:', error);
     next(error);
   }
 };
@@ -72,6 +95,8 @@ const searchEvents = async (req, res, next) => {
 // Search for nearby events (simplified version)
 const nearbyEvents = async (req, res, next) => {
   try {
+    console.log('Received nearby events request');
+    
     // Get user's location
     let latitude, longitude;
     
@@ -79,42 +104,58 @@ const nearbyEvents = async (req, res, next) => {
       const user = await User.findById(req.user.id);
       latitude = user.location.latitude;
       longitude = user.location.longitude;
+      console.log('Using authenticated user location:', { latitude, longitude });
     } else {
       // If not authenticated, require location parameters
       latitude = req.query.latitude;
       longitude = req.query.longitude;
+      console.log('Using query parameters for location:', { latitude, longitude });
       
       if (!latitude || !longitude) {
         return res.status(400).json({
           success: false,
-          message: req.t('search:locationRequired')
+          message: 'Location coordinates are required. Please provide latitude and longitude parameters.'
         });
       }
     }
     
-    const radius = req.query.radius || process.env.DEFAULT_SEARCH_RADIUS || 10;
+    // Convert parameters to numbers
+    const numLatitude = parseFloat(latitude);
+    const numLongitude = parseFloat(longitude);
+    const radius = parseFloat(req.query.radius) || parseFloat(process.env.DEFAULT_SEARCH_RADIUS) || 10;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     
+    console.log('Searching for nearby events with:', { 
+      latitude: numLatitude, 
+      longitude: numLongitude, 
+      radius,
+      page,
+      limit 
+    });
+    
     // Search events
     const events = await Event.search({
-      latitude,
-      longitude,
+      latitude: numLatitude,
+      longitude: numLongitude,
       radius,
       page,
       limit
     });
     
+    console.log(`Found ${events.events.length} nearby events out of ${events.pagination.total} total`);
+    
     res.status(200).json({
       success: true,
       location: {
-        latitude,
-        longitude,
+        latitude: numLatitude,
+        longitude: numLongitude,
         radius
       },
       data: events
     });
   } catch (error) {
+    console.error('Error in nearbyEvents:', error);
     next(error);
   }
 };

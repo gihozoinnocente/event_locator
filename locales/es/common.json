@@ -1,5 +1,12 @@
 {
     "welcome": "¡Bienvenido a Event Locator!",
+    "swagger": {
+      "title": "API de Event Locator",
+      "description": "Una API RESTful para descubrir eventos basados en ubicación",
+      "contact": {
+        "name": "Desarrollador"
+      }
+    },
     "events": {
       "title": "Eventos",
       "nearby": "Eventos Cercanos",
@@ -14,7 +21,9 @@
     },
     "notifications": {
       "title": "Notificaciones",
-      "newEvent": "Alerta de Nuevo Evento"
+      "newEvent": "Alerta de Nuevo Evento",
+      "marked_read": "Notificación marcada como leída",
+      "all_marked_read": "Todas las notificaciones marcadas como leídas"
     },
     "common": {
       "loading": "Cargando...",
@@ -26,7 +35,8 @@
       "edit": "Editar",
       "view": "Ver",
       "search": "Buscar",
-      "filter": "Filtrar"
+      "filter": "Filtrar",
+      "notFound": "Recurso no encontrado"
     },
     "location": {
       "distance": "Distancia",
@@ -40,5 +50,14 @@
       "settings": "Configuración",
       "favorites": "Favoritos",
       "logout": "Cerrar Sesión"
+    },
+    "auth": {
+      "unauthorized": "Debes iniciar sesión para acceder a este recurso",
+      "forbidden": "No tienes permiso para acceder a este recurso",
+      "validationError": "Por favor verifica tu entrada e intenta de nuevo",
+      "userExists": "Ya existe un usuario con este correo electrónico",
+      "registerSuccess": "Registro exitoso",
+      "invalidCredentials": "Correo electrónico o contraseña inválidos",
+      "loginSuccess": "Inicio de sesión exitoso"
     }
   }

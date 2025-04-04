@@ -1,175 +1,184 @@
-# Event Locator Application
+# Multi-User Event Locator Application
 
-A multi-user event locator application allowing users to discover events based on location and preferences. This application is built with Node.js, Express, PostgreSQL with PostGIS for geospatial capabilities, and Redis for asynchronous task processing.
+A robust backend application for locating events based on geospatial data, user preferences, and categories. This application demonstrates proficiency in Node.js, PostgreSQL with PostGIS, Redis for asynchronous notifications, and internationalization.
 
 ## Features
 
-- **User Management**: Secure user registration and login with password hashing. Users can set their location and preferred event categories.
-- **Event Management**: Create, read, update, and delete events, including event details, location (latitude/longitude), date/time, and categories.
-- **Location-Based Search**: Search functionality that allows users to find events within a specified radius of their location.
-- **Category Filtering**: Filter events based on categories.
-- **Multilingual Support (i18n)**: Support for multiple languages in the user interface.
-- **Notification System**: Redis-based queue to send notifications about upcoming events that match user preferences.
-- **Additional Features**:
-  - Event ratings and reviews
-  - Favoriting events
-  - Comprehensive filtering and sorting options
+- **User Management**
+  - Secure registration and authentication using JWT
+  - User profile with location and language preferences
+  - Category preferences for personalized event recommendations
 
-## Tech Stack
+- **Event Management**
+  - Create, read, update, and delete events
+  - Category tagging for events
+  - Event reviews and ratings
+  - Save events as favorites
 
-- **Backend**: Node.js, Express.js
-- **Database**: PostgreSQL with PostGIS extension for geospatial data
-- **Message Queue**: Redis Pub/Sub for asynchronous event notifications
-- **Authentication**: JWT (JSON Web Tokens), bcrypt for password hashing
-- **Internationalization**: i18next for multi-language support
-- **Testing**: Jest for unit testing
+- **Location-Based Search**
+  - Find events within a specified radius of user's location
+  - Filter events by categories, date range, and more
+  - Get personalized event recommendations based on preferences
+
+- **Multilingual Support**
+  - Support for multiple languages (English, Spanish, French)
+  - Localized error messages and notifications
+
+- **Notification System**
+  - Redis-based async notification queue
+  - Event creation notifications for interested users
+  - Event update notifications for users who saved the event
+  - Scheduled reminders before events
+
+- **API Documentation**
+  - Interactive Swagger documentation
+  - Detailed endpoint descriptions and examples
+  - Easy testing of API endpoints
+
+## Technologies Used
+
+- **Backend Framework**: Node.js with Express
+- **Database**: PostgreSQL with PostGIS for geospatial capabilities
+- **Authentication**: JWT with bcrypt for password hashing
 - **Validation**: express-validator for input validation
-
-## Prerequisites
-
-Before running this application, make sure you have the following installed:
-
-1. Node.js (v14 or higher)
-2. PostgreSQL with PostGIS extension
-3. Redis server
-4. Git (optional)
-
-## Installation
-
-1. Clone the repository (or download the source code)
-
-```bash
-git clone https://github.com/yourusername/event-locator-app.git
-cd event-locator-app
-```
-
-2. Install dependencies
-
-```bash
-npm install
-```
-
-3. Set up environment variables
-
-Create a `.env` file in the root directory and add the following variables (modify as needed):
-
-```
-# Server Configuration
-PORT=3000
-NODE_ENV=development
-
-# Database Configuration
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=event_locator
-DB_USER=postgres
-DB_PASSWORD=postgres
-
-# JWT Configuration
-JWT_SECRET=your_jwt_secret_key_here
-JWT_EXPIRES_IN=24h
-
-# Redis Configuration
-REDIS_HOST=localhost
-REDIS_PORT=6379
-
-# Default Radius for Location Search (in meters)
-DEFAULT_SEARCH_RADIUS=10000
-```
-
-4. Set up the PostgreSQL database
-
-```bash
-# Create the database
-createdb event_locator
-
-# Install PostGIS extension (if not already installed)
-# Run this command in your PostgreSQL client:
-# CREATE EXTENSION postgis;
-```
-
-5. Start the application
-
-```bash
-# Start the development server
-npm run dev
-
-# Start the notification worker (in a separate terminal)
-node src/workers/notification.worker.js
-```
+- **Internationalization**: i18next for multilingual support
+- **Message Queue**: Redis Pub/Sub for async notifications
+- **API Documentation**: Swagger UI and JSDoc
+- **Testing**: Jest for unit testing
 
 ## Project Structure
 
 ```
-event-locator-app/
-├── src/
-│   ├── config/           # Configuration files
-│   ├── controllers/      # Route controllers
-│   ├── locales/          # i18n translation files
-│   ├── middleware/       # Custom middleware
-│   ├── routes/           # API routes
-│   ├── utils/            # Utility functions
-│   ├── workers/          # Background workers
-│   └── server.js         # Main application entry point
-├── tests/                # Test files
-├── .env                  # Environment variables (create this)
-├── .gitignore            # Git ignore file
-├── package.json          # Project dependencies
-└── README.md             # Project documentation
+event-locator/
+├── config/                  # Configuration files
+├── models/                  # Database models
+├── controllers/             # Request handlers
+├── routes/                  # API routes
+├── services/                # Business logic
+├── middleware/              # Custom middleware
+├── utils/                   # Utility functions
+├── locales/                 # Translation files
+├── tests/                   # Test files
+├── database/                # Database schema and migrations
+├── .env                     # Environment variables
+└── server.js                # Application entry point
 ```
+
+## API Documentation
+
+The API is documented using Swagger. Once the server is running, you can access the interactive API documentation at:
+
+```
+http://localhost:5000/api-docs
+```
+
+This provides:
+- Detailed information about all endpoints
+- Request/response schemas
+- The ability to test API calls directly from the browser
+- Authentication support for testing protected endpoints
 
 ## API Endpoints
 
 ### Authentication
-
 - `POST /api/auth/register` - Register a new user
-- `POST /api/auth/login` - Log in a user
+- `POST /api/auth/login` - Login user
+- `GET /api/auth/me` - Get current user profile
 
 ### Users
-
-- `GET /api/users/profile` - Get user profile
 - `PUT /api/users/profile` - Update user profile
-- `PUT /api/users/location` - Update user location
 - `PUT /api/users/preferences` - Update user category preferences
+- `GET /api/users/preferences` - Get user category preferences
+- `POST /api/users/favorites/:eventId` - Save event as favorite
+- `DELETE /api/users/favorites/:eventId` - Remove event from favorites
 - `GET /api/users/favorites` - Get user's favorite events
+- `GET /api/users/notifications` - Get user notifications
+- `PUT /api/users/notifications/:notificationId/read` - Mark notification as read
+- `PUT /api/users/notifications/read-all` - Mark all notifications as read
 
 ### Events
-
 - `POST /api/events` - Create a new event
-- `GET /api/events` - Get all events with filtering options
-- `GET /api/events/:id` - Get event by ID
-- `PUT /api/events/:id` - Update event
-- `DELETE /api/events/:id` - Delete event
-- `POST /api/events/:id/rate` - Rate an event
-- `POST /api/events/:id/favorite` - Toggle favorite status of an event
+- `GET /api/events` - Get all events with pagination
+- `GET /api/events/:eventId` - Get a specific event
+- `PUT /api/events/:eventId` - Update an event
+- `DELETE /api/events/:eventId` - Delete an event
+- `GET /api/events/category/:categoryId` - Get events by category
+- `POST /api/events/:eventId/reviews` - Add a review to an event
+- `GET /api/events/:eventId/reviews` - Get reviews for an event
 
-### Categories
-
-- `GET /api/categories` - Get all categories
-- `POST /api/categories` - Create a new category
-- `PUT /api/categories/:id` - Update a category
-- `DELETE /api/categories/:id` - Delete a category
-
-## Testing
-
-Run tests using Jest:
-
-```bash
-npm test
-```
+### Search
+- `GET /api/search/events` - Search for events based on location and filters
+- `GET /api/search/nearby` - Get nearby events
+- `GET /api/search/recommended` - Get recommended events based on user preferences
 
 ## Database Schema
 
-The application uses the following database tables:
+The database schema includes the following tables:
+- `users` - User profiles with authentication info and location
+- `categories` - Event categories
+- `events` - Event details including geospatial location
+- `event_categories` - Junction table for events and categories
+- `user_category_preferences` - Junction table for users and their preferred categories
+- `reviews` - Event reviews and ratings
+- `saved_events` - Users' favorite events
+- `notifications` - User notifications
 
-1. **users**: Stores user information, including their geographic location
-2. **categories**: Event categories (e.g., Music, Sports, Business)
-3. **events**: Event details, including location, date/time, and description
-4. **event_categories**: Junction table for events and categories (many-to-many)
-5. **user_category_preferences**: Junction table for user category preferences
-6. **event_ratings**: User ratings and reviews for events
-7. **user_favorite_events**: Junction table for user favorite events
+## Setup and Installation
 
-## License
+### Prerequisites
+- Node.js (v14+)
+- PostgreSQL with PostGIS extension
+- Redis server
 
-This project is licensed under the ISC License.
+### Installation Steps
+
+1. Clone the repository
+   ```
+   git clone https://github.com/yourusername/event-locator.git
+   cd event-locator
+   ```
+
+2. Install dependencies
+   ```
+   npm install
+   ```
+
+3. Create a `.env` file based on `.env.example`
+   ```
+   cp .env.example .env
+   ```
+
+4. Set up the PostgreSQL database
+   ```
+   psql -U postgres -c "CREATE DATABASE event_locator"
+   psql -U postgres -d event_locator -c "CREATE EXTENSION postgis"
+   ```
+
+5. Run the database schema script
+   ```
+   psql -U postgres -d event_locator -f database/schema.sql
+   ```
+
+6. Start the server
+   ```
+   npm start
+   ```
+
+7. Access the API documentation at `http://localhost:5000/api-docs`
+
+## Testing
+
+Run the test suite with:
+```
+npm test
+```
+![Test Coverage](images/test.png)
+
+## Future Enhancements
+
+- Real-time event updates using WebSockets
+- Integration with external mapping services
+- Mobile app with push notifications
+- OAuth authentication for social login
+- Advanced search with more filters
+- Event registration and ticketing

@@ -1,0 +1,44 @@
+{
+    "welcome": "Bienvenue sur Event Locator !",
+    "events": {
+      "title": "Événements",
+      "nearby": "Événements à proximité",
+      "search": "Rechercher des événements",
+      "create": "Créer un événement",
+      "details": "Détails de l'événement",
+      "noEvents": "Aucun événement trouvé"
+    },
+    "categories": {
+      "title": "Catégories",
+      "select": "Sélectionner des catégories"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "newEvent": "Alerte de nouvel événement"
+    },
+    "common": {
+      "loading": "Chargement...",
+      "error": "Une erreur s'est produite",
+      "success": "Succès !",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "edit": "Modifier",
+      "view": "Voir",
+      "search": "Rechercher",
+      "filter": "Filtrer"
+    },
+    "location": {
+      "distance": "Distance",
+      "km": "km",
+      "miles": "miles",
+      "address": "Adresse",
+      "setLocation": "Définir l'emplacement"
+    },
+    "user": {
+      "profile": "Profil",
+      "settings": "Paramètres",
+      "favorites": "Favoris",
+      "logout": "Déconnexion"
+    }
+  }
